@@ -1,0 +1,8 @@
+@import "~antd/dist/antd.css";
+
+body {
+  background: #ececec;
+}
+.App {
+  padding: 30px;
+}

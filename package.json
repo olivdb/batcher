@@ -1,0 +1,27 @@
+{
+  "name": "batcher",
+  "version": "1.0.0",
+  "description": "Defi Batcher",
+  "scripts": {
+    "compile": "npx truffle compile",
+    "ganache": "npx ganache-cli --gasLimit=10000000 -e 10000 -d ganache-cli 1337",
+    "migrate:rinkeby": "npx truffle migrate --network rinkeby",
+    "test": "npx truffle test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/olivdb/batcher.git"
+  },
+  "devDependencies": {
+    "@truffle/hdwallet-provider": "^1.2.0",
+    "delay": "^4.4.0",
+    "dotenv": "^8.2.0",
+    "openzeppelin-solidity": "https://github.com/OpenZeppelin/openzeppelin-contracts/tarball/solc-0.8",
+    "truffle": "^5.1.58",
+    "truffle-source-verify": "0.0.5"
+  },
+  "dependencies": {
+    "axios": "^0.21.0",
+    "web3": "^1.3.1"
+  }
+}
