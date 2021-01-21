@@ -18,11 +18,10 @@ class Batch extends Component {
 
   handleSubmit = async () => {
     const numVars = this.getNumVarsAvailableForCall(this.state.calls.length);
-    console.log({ numVars });
 
     const payload = this.state.calls
-      .filter((c) => c.address)
-      .map(({ abi, functionId, inputs, address, outputVarIds }, index) => {
+      .filter((c) => c.address && c.abi && c.functionId)
+      .map(({ abi, functionId, inputs, address, outputVarIds, valueInput }, index) => {
         const fun = abi && abi.filter((e) => e.type === "function")[functionId];
         if (inputs.some((input) => !input)) throw new Error(`Call ${index} has a missing input`);
         const placeholders = inputs.map((_, idx) => window.web3.utils.sha3(`batcher.call${index}.input${idx}`));
@@ -36,33 +35,26 @@ class Batch extends Component {
         const dataWithPlaceholders = window.web3.eth.abi.encodeFunctionCall(funAfterTypeToUintSubstitution, paramsWithPlaceholders);
         const varPositions = [...Array(numVars + 1).keys()].slice(1).map((varId) => {
           const inputIndex = inputs.findIndex((input) => input.type === "variable" && input.value === varId);
-          // console.log({
-          //   call: index,
-          //   varId,
-          //   inputIndex,
-          //   ph: inputIndex > -1 && placeholders[inputIndex].slice(2),
-          //   dataWithPlaceholders,
-          //   indexOf: inputIndex > -1 && dataWithPlaceholders.slice(2).indexOf(placeholders[inputIndex].slice(2)),
-          // });
-          return (inputIndex > -1 && dataWithPlaceholders.slice(2).indexOf(placeholders[inputIndex].slice(2))) || 0;
+          return (inputIndex > -1 && dataWithPlaceholders.slice(2).indexOf(placeholders[inputIndex].slice(2)) / 2) || 0;
         });
 
+        const value = (valueInput && valueInput.type === "value" && valueInput.value) || 0;
         const params = inputs.map((input) => (input.type === "value" ? input.value : 0));
         const data = window.web3.eth.abi.encodeFunctionCall(funAfterTypeToUintSubstitution, params);
-        //   console.log({ varPositions, dataWithPlaceholders, data });
+
         return {
           to: address,
           data,
-          value: 0,
+          value,
           outVarIndex: outputVarIds[0] || 0, // only first output is used for now!!
           varPositions,
         };
       });
 
-    const batcher = new window.web3.eth.Contract(Batcher.abi, "0xf89a6B623fCB073371d12765218557a6cdB8F989");
+    const batcher = new window.web3.eth.Contract(Batcher.abi, "0x9889BB16497B9C07139871aea42E1c819a9f7e88");
     const accounts = await window.web3.eth.requestAccounts();
     const txR = await batcher.methods.execute(payload, numVars).send({ from: accounts[0] });
-    // const txR = await batcher.methods.test().send({ from: accounts[0] });
+
     console.log({ txR });
   };
 

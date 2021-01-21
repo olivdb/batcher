@@ -29,8 +29,8 @@ contract Batcher is Ownable {
             uint[] memory varPositions = calls[i].varPositions;
             for(uint varId = 0; varId < numVars; varId++) {
                 uint varPos = varPositions[varId];
-                uint varValue = vars[varId];
                 if(varPos > 3) {
+                    uint varValue = vars[varId];
                     assembly {
                         mstore(add(data, add(0x20, varPos)), varValue)
                     }

@@ -57,6 +57,14 @@ class Call extends Component {
     this.props.onCallChanged({ inputs });
   };
 
+  handleValueInputChanged = (value) => {
+    this.props.onCallChanged({ valueInput: { type: "value", value } });
+  };
+
+  handleVariableSelectedForValueInput = (varId) => {
+    this.props.onCallChanged({ valueInput: { type: "variable", value: varId } });
+  };
+
   handleVariableSelectedForOutput = (outputIndex, varId) => {
     const outputVarIds = [...this.props.outputVarIds];
     const { numVars } = this.props;
@@ -106,6 +114,57 @@ class Call extends Component {
           </Select>
         </Form.Item>
       )
+    );
+  }
+
+  renderValueInput() {
+    const { abi, functionId, valueInput, numVars } = this.props;
+    if (!abi || isNaN(parseInt(functionId))) return null;
+    const func = abi.filter((e) => e.type === "function")[functionId];
+    if (!func.payable && func.stateMutability !== "payable") return null;
+
+    const value = valueInput && (valueInput.type === "value" ? valueInput.value : `⟵ Read from Var${valueInput.value}`);
+    // variables not yet supported for valueInput
+    const possibleVarIds = []; //[...Array(numVars).keys()].map((i) => i + 1);
+
+    return (
+      <Form labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
+        <Divider orientation="left" plain>
+          ETH Sent
+        </Divider>
+        <Form.Item label="value">
+          <Row gutter={16}>
+            <Col span={18}>
+              <Input
+                name="value"
+                placeholder="uint256"
+                value={value}
+                onChange={(e) => this.handleValueInputChanged(e.target.value)}
+                disabled={(valueInput && valueInput.type === "variable") || false}
+              />
+            </Col>
+            <Col span={6}>
+              {numVars > 0 && (
+                <Select
+                  defaultValue={(valueInput && valueInput.type === "variable" && valueInput.value) || 0}
+                  onChange={(varId) => {
+                    this.handleVariableSelectedForValueInput(varId);
+                  }}
+                >
+                  <Option key={0} value={0}>
+                    No Variable
+                  </Option>
+                  {possibleVarIds.map((i) => (
+                    <Option key={i} value={i}>
+                      Var{i}
+                    </Option>
+                  ))}
+                </Select>
+              )}
+            </Col>
+          </Row>
+        </Form.Item>
+      </Form>
     );
   }
 
@@ -232,6 +291,7 @@ class Call extends Component {
             <Col span={8}>{this.renderFunctions()}</Col>
           </Row>
         </Form>
+        {this.renderValueInput()}
         {this.renderInputs()}
         {this.renderOutputs()}
       </Fragment>
