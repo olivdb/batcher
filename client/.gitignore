@@ -24,4 +24,6 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-src/build
+# src/build
+# !src/build/contracts/Batcher.json
+# !src/build/contracts/BatcherFactory.json
