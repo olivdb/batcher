@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Card, Row, Col, Collapse, Button, Space, Input } from "antd";
 
-import { PlusOutlined, UnorderedListOutlined, CopyOutlined, CloseOutlined } from "@ant-design/icons";
+import { PlusOutlined, UnorderedListOutlined, CopyOutlined, CloseOutlined, ImportOutlined, ExportOutlined } from "@ant-design/icons";
 // import { ethers } from "ethers";
 
 import Batcher from "../build/contracts/Batcher.json";
@@ -203,8 +203,12 @@ class Batch extends Component {
             <Col span={12}>
               <div style={{ textAlign: "right" }}>
                 <Space size="small">
-                  <Button onClick={this.handleLoad}>Load</Button>
-                  <Button onClick={this.handleSave}>Save</Button>
+                  <Button style={{ paddingLeft: 8, paddingRight: 8 }} onClick={this.handleLoad} icon={<ImportOutlined />}>
+                    Import
+                  </Button>
+                  <Button style={{ paddingLeft: 8, paddingRight: 8 }} onClick={this.handleSave} icon={<ExportOutlined />}>
+                    Export
+                  </Button>
                   <Input name="value" placeholder="value (wei)" value={this.state.value} onChange={(e) => this.handleValueChanged(e.target.value)} />
                   <Button type="primary" onClick={this.handleSubmit}>
                     Submit
