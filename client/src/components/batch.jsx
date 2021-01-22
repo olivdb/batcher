@@ -6,7 +6,6 @@ import { PlusOutlined, UnorderedListOutlined, CopyOutlined, CloseOutlined, Impor
 
 import Batcher from "../build/contracts/Batcher.json";
 import withBatcher from "./withBatcher";
-import withChainId from "./withChainId";
 import Call from "./call";
 import "./batch.scss";
 
@@ -115,21 +114,20 @@ class Batch extends Component {
 
   handleLoad = async () => {
     const { batcherAddress } = this.props;
-    // try {
-    let json = await navigator.clipboard.readText();
+    try {
+      let json = await navigator.clipboard.readText();
 
-    if (json.includes("__MY_BATCHER__")) {
-      if (!batcherAddress) return;
-      json = json.replace(/__MY_BATCHER__/g, batcherAddress);
-      console.log("rep", batcherAddress);
+      if (json.includes("__MY_BATCHER__")) {
+        if (!batcherAddress) return;
+        json = json.replace(/__MY_BATCHER__/g, batcherAddress);
+        console.log("rep", batcherAddress);
+      }
+      const state = JSON.parse(json);
+      state.activeKeys = [];
+      this.setState(state);
+    } catch (err) {
+      console.warn("Error importing scipt:", err);
     }
-    const state = JSON.parse(json);
-    state.activeKeys = [];
-    this.setState(state);
-    console.log({ state });
-    // } catch (err) {
-    //   console.warn("Error importing scipt:", err);
-    // }
   };
 
   handleSave = async () => {
@@ -162,7 +160,7 @@ class Batch extends Component {
           (addr && `${addr.slice(0, 5)}…${addr.slice(40, 42)}`)
         );
       };
-      const formatInteger = (val) => (parseInt(val) >= 10000 ? parseInt(val).toExponential(2) : val);
+      const formatInteger = (val) => (parseInt(val) >= 10000000 ? parseInt(val).toExponential(2) : val);
 
       const formatScalar = (val, type) => {
         if (type === "address") {

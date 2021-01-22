@@ -17,22 +17,20 @@ contract Batcher is Ownable {
 
     receive() external payable {}
 
-    uint public testVar;
-    function test() external {
-        testVar += 1;
-    }
-
     function execute(Call[] memory calls, uint numVars) external payable onlyOwner /*returns (uint[] memory vars)*/ {
         uint[] memory vars = new uint[](numVars);
         for(uint i = 0; i < calls.length; i++) {
             bytes memory data = calls[i].data;
-            uint[] memory varPositions = calls[i].varPositions;
-            for(uint varId = 0; varId < numVars; varId++) {
-                uint varPos = varPositions[varId];
-                if(varPos > 3) {
-                    uint varValue = vars[varId];
-                    assembly {
-                        mstore(add(data, add(0x20, varPos)), varValue)
+
+            if(i > 0) {
+                uint[] memory varPositions = calls[i].varPositions;
+                for(uint varId = 0; varId < numVars; varId++) {
+                    uint varPos = varPositions[varId];
+                    if(varPos > 3) {
+                        uint varValue = vars[varId];
+                        assembly {
+                            mstore(add(data, add(0x20, varPos)), varValue)
+                        }
                     }
                 }
             }

@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from "react";
+import React, { Component } from "react";
 import { Row, Col, Button, Input, Select, Form, Divider } from "antd";
 import { PlusOutlined, MinusCircleOutlined } from "@ant-design/icons";
 import axios from "axios";
@@ -193,7 +193,7 @@ class Call extends Component {
 
     const func = abi.filter((e) => e.type === "function")[functionId];
     const innerType = func.inputs[inputIndex].type.replace("]", "").replace("[", "");
-    const arrayValue = inputs[inputIndex] && inputs[inputIndex].value;
+    const arrayValue = (inputs[inputIndex] && inputs[inputIndex].value) || [];
     return (
       <Row>
         <Col span={18}>
@@ -357,7 +357,7 @@ class Call extends Component {
 
   render() {
     return (
-      <Fragment>
+      <>
         <Form>
           <Row gutter={16}>
             <Col span={14}>{this.renderContractAddress()}</Col>
@@ -367,7 +367,7 @@ class Call extends Component {
         {this.renderValueInput()}
         {this.renderInputs()}
         {this.renderOutputs()}
-      </Fragment>
+      </>
     );
   }
 }
