@@ -43,21 +43,21 @@ const withBatcher = (WrappedComponent) => {
     createBatcher = async () => {
       this.setState({ batcherLoading: true });
       const accounts = await window.web3.eth.requestAccounts();
+      if (!this.props.chainId) return;
 
       //   const factory = this.getFactory();
       //   const txR = await factory.methods.build(accounts[0]).send({ from: accounts[0] });
       //   const batcherAddress = txR.receipt.logs[0].args.batcher;
 
       const { abi, networks } = BatcherFactory;
-      const { address } = networks["4"];
+      const { address } = networks[this.props.chainId.toString()];
       const factory = new ethers.Contract(address, abi, window.provider).connect(window.provider.getSigner());
       console.log({ factory });
+
       let batcherAddress = null;
       try {
         const txR = await (await factory["build(address)"](accounts[0])).wait();
-        console.log({ txR });
         batcherAddress = `0x${txR.logs[2].data.slice(26)}`;
-        console.log({ batcherAddress });
       } finally {
         this.setState({ batcherAddress, batcherLoading: false });
       }

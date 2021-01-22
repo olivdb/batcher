@@ -6,6 +6,7 @@ import { PlusOutlined, UnorderedListOutlined, CopyOutlined, CloseOutlined, Impor
 
 import Batcher from "../build/contracts/Batcher.json";
 import withBatcher from "./withBatcher";
+import withChainId from "./withChainId";
 import Call from "./call";
 import "./batch.scss";
 
@@ -145,9 +146,13 @@ class Batch extends Component {
           (addr && `${addr.slice(0, 5)}…${addr.slice(40, 42)}`)
         );
       };
+      const formatInteger = (val) => (parseInt(val) >= 10000 ? parseInt(val).toExponential(2) : val);
+
       const formatScalar = (val, type) => {
         if (type === "address") {
           return formatAddress(val);
+        } else if (type === "uint256") {
+          return formatInteger(val);
         }
         return val || 0;
       };
@@ -190,7 +195,7 @@ class Batch extends Component {
   render() {
     return (
       <Row>
-        <Col span={12} offset={6}>
+        <Col span={14} offset={5}>
           <Row style={{ paddingBottom: 15 }}>
             <Col span={12}>
               <div style={{ textAlign: "left" }}>
@@ -249,4 +254,4 @@ class Batch extends Component {
   }
 }
 
-export default withBatcher(Batch);
+export default withChainId(withBatcher(Batch));

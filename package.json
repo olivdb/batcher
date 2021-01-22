@@ -6,6 +6,8 @@
     "compile": "npx truffle compile",
     "ganache": "npx ganache-cli --gasLimit=10000000 -e 10000 -d ganache-cli 1337",
     "migrate:rinkeby": "npx truffle migrate --network rinkeby",
+    "migrate:ropsten": "npx truffle migrate --network ropsten",
+    "migrate:kovan": "npx truffle migrate --network kovan",
     "test": "npx truffle test"
   },
   "repository": {

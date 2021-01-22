@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from "react";
 import { Row, Col, Button, Input, Select, Form, Divider } from "antd";
-import { CloseOutlined, PlusOutlined, MinusCircleOutlined } from "@ant-design/icons";
+import { PlusOutlined, MinusCircleOutlined } from "@ant-design/icons";
 import axios from "axios";
 
 import "./call.scss";
@@ -194,7 +194,6 @@ class Call extends Component {
     const func = abi.filter((e) => e.type === "function")[functionId];
     const innerType = func.inputs[inputIndex].type.replace("]", "").replace("[", "");
     const arrayValue = inputs[inputIndex] && inputs[inputIndex].value;
-
     return (
       <Row>
         <Col span={18}>
@@ -206,6 +205,7 @@ class Call extends Component {
                     <Row>
                       <Col span={22}>
                         <Input
+                          value={arrayValue[arrayIndex]}
                           name={innerType}
                           placeholder={innerType}
                           onChange={(e) => this.handleArrayInputValueChanged(inputIndex, arrayIndex, e.target.value)}
@@ -360,8 +360,8 @@ class Call extends Component {
       <Fragment>
         <Form>
           <Row gutter={16}>
-            <Col span={16}>{this.renderContractAddress()}</Col>
-            <Col span={8}>{this.renderFunctions()}</Col>
+            <Col span={14}>{this.renderContractAddress()}</Col>
+            <Col span={10}>{this.renderFunctions()}</Col>
           </Row>
         </Form>
         {this.renderValueInput()}

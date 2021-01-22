@@ -25,6 +25,38 @@ module.exports = {
       gasPrice: 1000000000, // 1 GWei
       skipDryRun: true,
     },
+
+    ropsten: {
+      provider: () =>
+        new HDWalletProvider({
+          mnemonic: {
+            phrase: process.env.DEPLOYER_MNEMONIC,
+          },
+          providerOrUrl: `wss://ropsten.infura.io/ws/v3/${process.env.INFURA_KEY}`,
+          addressIndex: 0,
+          numberOfAddresses: 4,
+        }),
+      network_id: 3,
+      gas: 8000000, // Gas limit
+      gasPrice: 1000000000, // 1 GWei
+      skipDryRun: true,
+    },
+
+    kovan: {
+      provider: () =>
+        new HDWalletProvider({
+          mnemonic: {
+            phrase: process.env.DEPLOYER_MNEMONIC,
+          },
+          providerOrUrl: `wss://kovan.infura.io/ws/v3/${process.env.INFURA_KEY}`,
+          addressIndex: 0,
+          numberOfAddresses: 4,
+        }),
+      network_id: 42,
+      gas: 8000000, // Gas limit
+      gasPrice: 1000000000, // 1 GWei
+      skipDryRun: true,
+    },
   },
 
   // Set default mocha options here, use special reporters etc.
