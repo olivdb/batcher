@@ -26,7 +26,7 @@ const withBatcher = (WrappedComponent) => {
         filter: { owner: accounts[0] },
         fromBlock: 0,
       });
-      console.log({ creates });
+
       let batcherAddress = null;
       for (let i = creates.length - 1; i >= 0; i--) {
         const address = creates[i].returnValues.batcher;
@@ -52,7 +52,6 @@ const withBatcher = (WrappedComponent) => {
       const { abi, networks } = BatcherFactory;
       const { address } = networks[this.props.chainId.toString()];
       const factory = new ethers.Contract(address, abi, window.provider).connect(window.provider.getSigner());
-      console.log({ factory });
 
       let batcherAddress = null;
       try {
