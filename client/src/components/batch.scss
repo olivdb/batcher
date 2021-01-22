@@ -1,0 +1,17 @@
+.proxy-card {
+  font-size: small;
+  .ant-card-body {
+    border: 1px solid lightgray;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  .label {
+    color: gray;
+  }
+  .address {
+    font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono,
+      DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
+  }
+}

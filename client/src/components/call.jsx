@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from "react";
-import { Row, Col, Collapse, Button, Space, Input, Select, Form, Divider } from "antd";
-import { CloseOutlined, PlusOutlined } from "@ant-design/icons";
+import { Row, Col, Button, Input, Select, Form, Divider } from "antd";
+import { CloseOutlined, PlusOutlined, MinusCircleOutlined } from "@ant-design/icons";
 import axios from "axios";
 
 import "./call.scss";
@@ -10,7 +10,15 @@ const API = "https://api-rinkeby.etherscan.io/api";
 const API_KEY = "RP3EJKCTCY5ZXA7T6FN2NPTHKKWKVPZHWI";
 
 class Call extends Component {
-  state = { addressValidationStatus: null, addressError: null, newAddress: null };
+  state = { addressValidationStatus: null, addressError: null, newAddress: null, addressFocus: false };
+
+  handleContractAddressFocus = (addressFocus) => {
+    let newState = { addressFocus };
+    if (!addressFocus) {
+      newState = { ...newState, newAddress: null, addressValidationStatus: null, addressError: null };
+    }
+    this.setState(newState);
+  };
 
   handleContractChanged = async (newAddress) => {
     const { onCallChanged, address } = this.props;
@@ -23,13 +31,13 @@ class Call extends Component {
       this.setState({ addressValidationStatus: "validating", addressError: null });
       let data = (await axios.get(API, { params: { module: "contract", action: "getabi", address: newAddress, apiKey: API_KEY } })).data;
       if (data.status === "0") {
-        onCallChanged({ abi: null, address: null, contractName: null });
+        onCallChanged({ abi: null, address: null, contractName: null, functionId: null, inputs: null, outputVarIds: null, valueInput: null });
         this.setState({ addressValidationStatus: "error", addressError: data.result });
       } else {
         const abi = JSON.parse(data.result);
         data = (await axios.get(API, { params: { module: "contract", action: "getsourcecode", address: newAddress, apiKey: API_KEY } })).data;
         const contractName = (data.status === "1" && data.result[0].ContractName) || null;
-        onCallChanged({ abi, address: newAddress, contractName });
+        onCallChanged({ abi, address: newAddress, contractName, functionId: null, inputs: null, outputVarIds: null, valueInput: null });
         this.setState({ addressValidationStatus: "success", addressError: null });
       }
     } else {
@@ -48,6 +56,15 @@ class Call extends Component {
   handleInputValueChanged = (index, value) => {
     const inputs = [...this.props.inputs];
     inputs[index] = { type: "value", value };
+    this.props.onCallChanged({ inputs });
+  };
+
+  handleArrayInputValueChanged = (index, arrayIndex, value) => {
+    const inputs = [...this.props.inputs];
+    const array = [...({ ...(inputs[index] || {}) }.value || [])];
+    if (value === null) array.splice(arrayIndex, 1);
+    else array[arrayIndex] = value;
+    inputs[index] = { type: "value", value: array };
     this.props.onCallChanged({ inputs });
   };
 
@@ -85,27 +102,30 @@ class Call extends Component {
 
   renderContractAddress() {
     const { address } = this.props;
-    const { addressError, addressValidationStatus, newAddress } = this.state;
+    const { addressError, addressValidationStatus, newAddress, addressFocus } = this.state;
+
     return (
       <Form.Item validateStatus={addressValidationStatus} hasFeedback help={addressError}>
         <Input
-          name="input_1"
+          name="address"
           placeholder={address || "Contract Address"}
-          value={newAddress}
+          value={addressFocus && newAddress !== null ? newAddress : address}
           onChange={(e) => this.handleContractChanged(e.target.value)}
+          onFocus={() => this.handleContractAddressFocus(true)}
+          onBlur={() => this.handleContractAddressFocus(false)}
         />
       </Form.Item>
     );
   }
 
   renderFunctions() {
-    const { abi, functionId } = this.props;
+    const { abi, functionId, address } = this.props;
     const functions = (abi && abi.filter((e) => e.type === "function").map((func, id) => [func.name, id])) || null;
 
     return (
       functions && (
         <Form.Item>
-          <Select defaultValue={parseInt(functionId) >= 0 ? functionId : null} onChange={this.handleFunctionChanged}>
+          <Select key={address} defaultValue={functionId} onChange={this.handleFunctionChanged}>
             {functions.map(([n, i]) => (
               <Option key={i} value={i}>
                 {n}
@@ -168,6 +188,54 @@ class Call extends Component {
     );
   }
 
+  renderArrayInput(inputIndex) {
+    const { abi, functionId, inputs } = this.props;
+
+    const func = abi.filter((e) => e.type === "function")[functionId];
+    const innerType = func.inputs[inputIndex].type.replace("]", "").replace("[", "");
+    const arrayValue = inputs[inputIndex] && inputs[inputIndex].value;
+
+    return (
+      <Row>
+        <Col span={18}>
+          <Form.List name={`input-${inputIndex}`} initialValue={arrayValue}>
+            {(fields, { add, remove }) => (
+              <>
+                {fields.map((field, arrayIndex) => (
+                  <Form.Item {...field}>
+                    <Row>
+                      <Col span={22}>
+                        <Input
+                          name={innerType}
+                          placeholder={innerType}
+                          onChange={(e) => this.handleArrayInputValueChanged(inputIndex, arrayIndex, e.target.value)}
+                        />
+                      </Col>
+                      <Col span={2}>
+                        <MinusCircleOutlined
+                          className="dynamic-delete-button"
+                          onClick={() => {
+                            this.handleArrayInputValueChanged(inputIndex, arrayIndex, null);
+                            remove(field.name);
+                          }}
+                        />
+                      </Col>
+                    </Row>
+                  </Form.Item>
+                ))}
+                <Form.Item className="array-input-add-entry">
+                  <Button type="dashed" onClick={() => add()} style={{ width: "100%" }} icon={<PlusOutlined />}>
+                    Add Entry
+                  </Button>
+                </Form.Item>
+              </>
+            )}
+          </Form.List>
+        </Col>
+      </Row>
+    );
+  }
+
   renderInputs() {
     const { abi, functionId, inputs, numVars } = this.props;
     if (!abi || isNaN(parseInt(functionId))) return null;
@@ -186,38 +254,43 @@ class Call extends Component {
               .map((i) => i + 1)
               .filter((varId) => !(inputs || []).some((input, i) => i !== inputIndex && input && input.type === "variable" && input.value === varId)); // no duplicate varId in input for now
 
+            const field = type.endsWith("[]") ? (
+              this.renderArrayInput(inputIndex)
+            ) : (
+              <Row gutter={16}>
+                <Col span={18}>
+                  <Input
+                    name={type}
+                    placeholder={type}
+                    value={value}
+                    onChange={(e) => this.handleInputValueChanged(inputIndex, e.target.value)}
+                    disabled={(input && input.type === "variable") || false}
+                  />
+                </Col>
+                <Col span={6}>
+                  {numVars > 0 && (
+                    <Select
+                      defaultValue={(input && input.type === "variable" && input.value) || 0}
+                      onChange={(varId) => {
+                        this.handleVariableSelectedForInput(inputIndex, varId);
+                      }}
+                    >
+                      <Option key={0} value={0}>
+                        No Variable
+                      </Option>
+                      {possibleVarIds.map((i) => (
+                        <Option key={i} value={i}>
+                          Var{i}
+                        </Option>
+                      ))}
+                    </Select>
+                  )}
+                </Col>
+              </Row>
+            );
             return (
               <Form.Item label={name || `input ${inputIndex}`} key={inputIndex}>
-                <Row gutter={16}>
-                  <Col span={18}>
-                    <Input
-                      name={type}
-                      placeholder={type}
-                      value={value}
-                      onChange={(e) => this.handleInputValueChanged(inputIndex, e.target.value)}
-                      disabled={(input && input.type === "variable") || false}
-                    />
-                  </Col>
-                  <Col span={6}>
-                    {numVars > 0 && (
-                      <Select
-                        defaultValue={(input && input.type === "variable" && input.value) || 0}
-                        onChange={(varId) => {
-                          this.handleVariableSelectedForInput(inputIndex, varId);
-                        }}
-                      >
-                        <Option key={0} value={0}>
-                          No Variable
-                        </Option>
-                        {possibleVarIds.map((i) => (
-                          <Option key={i} value={i}>
-                            Var{i}
-                          </Option>
-                        ))}
-                      </Select>
-                    )}
-                  </Col>
-                </Row>
+                {field}
               </Form.Item>
             );
           })}

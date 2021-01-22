@@ -38,7 +38,14 @@ contract Batcher is Ownable {
             }
 
             (bool success, bytes memory out) = calls[i].to.call{ value: calls[i].value }(data);
-            require(success, "Subcall failed");
+            if (!success) {
+                // solhint-disable-next-line no-inline-assembly
+                assembly {
+                    returndatacopy(0, 0, returndatasize())
+                    revert(0, returndatasize())
+                }
+            }
+
             uint outVarId = calls[i].outVarIndex;
             if(outVarId > 0) {
                 vars[outVarId - 1] = abi.decode(out, (uint256));
