@@ -268,4 +268,4 @@ class Batch extends Component {
   }
 }
 
-export default withChainId(withBatcher(Batch));
+export default withBatcher(Batch);
