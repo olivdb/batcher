@@ -27,6 +27,8 @@ const { verify } = require("./verify");
 
 module.exports = function (deployer, network, accounts) {
   return deployer.then(async () => {
+    // await deployer.deploy(BatcherFactory);
+
     if (network !== "rinkeby") return;
     let txR;
 

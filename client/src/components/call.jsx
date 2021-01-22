@@ -7,7 +7,7 @@ import "./call.scss";
 
 const { Option } = Select;
 const API = "https://api-rinkeby.etherscan.io/api";
-const API_KEY = "RP3EJKCTCY5ZXA7T6FN2NPTHKKWKVPZHWI";
+const API_KEY = "VNAK514K6ENK93TA8TEKHT7FZF8G72RWR6";
 
 class Call extends Component {
   state = { addressValidationStatus: null, addressError: null, newAddress: null, addressFocus: false };
