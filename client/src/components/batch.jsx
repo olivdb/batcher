@@ -115,26 +115,28 @@ class Batch extends Component {
 
   handleLoad = async () => {
     const { batcherAddress } = this.props;
-    try {
-      let json = await navigator.clipboard.readText();
+    // try {
+    let json = await navigator.clipboard.readText();
 
-      if (json.includes("__MY_BATCHER__")) {
-        if (!batcherAddress) return;
-        json.replace(/__MY_BATCHER__/g, batcherAddress);
-      }
-      const state = JSON.parse(json);
-      state.activeKeys = [];
-      this.setState(state);
-    } catch (err) {
-      console.warn("Error importing scipt:", err);
+    if (json.includes("__MY_BATCHER__")) {
+      if (!batcherAddress) return;
+      json = json.replace(/__MY_BATCHER__/g, batcherAddress);
+      console.log("rep", batcherAddress);
     }
+    const state = JSON.parse(json);
+    state.activeKeys = [];
+    this.setState(state);
+    console.log({ state });
+    // } catch (err) {
+    //   console.warn("Error importing scipt:", err);
+    // }
   };
 
   handleSave = async () => {
     const { batcherAddress } = this.props;
     let json = JSON.stringify(this.state);
     if (batcherAddress) {
-      json.replace(new RegExp(batcherAddress, "g"), "__MY_BATCHER__");
+      json = json.replace(new RegExp(batcherAddress, "g"), "__MY_BATCHER__");
     }
     await navigator.clipboard.writeText(json);
   };
