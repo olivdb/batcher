@@ -13,7 +13,7 @@ const withBatcher = (WrappedComponent) => {
 
     getFactory = () => {
       const { abi, networks } = BatcherFactory;
-      const { address } = networks["4"];
+      const { address } = networks[this.props.chainId.toString()];
       const factory = new window.web3.eth.Contract(abi, address);
       return factory;
     };
@@ -49,10 +49,10 @@ const withBatcher = (WrappedComponent) => {
       //   const txR = await factory.methods.build(accounts[0]).send({ from: accounts[0] });
       //   const batcherAddress = txR.receipt.logs[0].args.batcher;
 
+      // temporay using etherjs instead of web3js here until txReceipt issue is solved in web3js
       const { abi, networks } = BatcherFactory;
       const { address } = networks[this.props.chainId.toString()];
       const factory = new ethers.Contract(address, abi, window.provider).connect(window.provider.getSigner());
-
       let batcherAddress = null;
       try {
         const txR = await (await factory["build(address)"](accounts[0])).wait();
