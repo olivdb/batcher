@@ -5,13 +5,32 @@ import Batcher from "../build/contracts/Batcher.json";
 
 const withBatcher = (WrappedComponent) => {
   class WithBatcher extends React.Component {
-    state = { batcherAddress: null, batcherLoading: false };
+    state = { batcherAddress: null, batcherLoading: true };
 
     setState(state, callback) {
       this._isMounted && super.setState(state, callback);
     }
 
+    async componentDidMount() {
+      this._isMounted = true;
+      window.ethereum.on("accountsChanged", this.updateBatcher);
+      await this.updateBatcher();
+    }
+
+    async componentDidUpdate(prevProps, prevState) {
+      const { chainId } = this.props;
+      if (chainId !== prevProps.chainId) {
+        await this.updateBatcher();
+      }
+    }
+
+    componentWillUnmount() {
+      window.ethereum && window.ethereum.removeListener && window.ethereum.removeListener("accountsChanged", this.updateBatcher);
+      this._isMounted = false;
+    }
+
     getFactory = () => {
+      if (!this.props.chainId) return null;
       const { abi, networks } = BatcherFactory;
       const { address } = networks[this.props.chainId.toString()];
       const factory = new window.web3.eth.Contract(abi, address);
@@ -19,8 +38,9 @@ const withBatcher = (WrappedComponent) => {
     };
 
     updateBatcher = async () => {
-      this.setState({ batcherLoading: true });
       const factory = this.getFactory();
+      if (!factory) return;
+      this.setState({ batcherLoading: true });
       const accounts = await window.web3.eth.requestAccounts();
       const creates = await factory.getPastEvents("Created", {
         filter: { owner: accounts[0] },
@@ -61,17 +81,6 @@ const withBatcher = (WrappedComponent) => {
         this.setState({ batcherAddress, batcherLoading: false });
       }
     };
-
-    async componentDidMount() {
-      this._isMounted = true;
-      window.ethereum.on("accountsChanged", this.updateBatcher);
-      await this.updateBatcher();
-    }
-
-    componentWillUnmount() {
-      window.ethereum && window.ethereum.removeListener && window.ethereum.removeListener("accountsChanged", this.updateBatcher);
-      this._isMounted = false;
-    }
 
     render() {
       return <WrappedComponent {...this.state} createBatcher={this.createBatcher} {...this.props} />;

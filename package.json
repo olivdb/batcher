@@ -4,11 +4,13 @@
   "description": "Defi Batcher",
   "scripts": {
     "compile": "npx truffle compile",
-    "ganache": "npx ganache-cli --gasLimit=10000000 -e 10000 -d ganache-cli 1337",
     "deploy:client": "npm --prefix client run deploy",
     "deploy:rinkeby": "npx truffle migrate  --f 1 --to 1 --network rinkeby",
     "deploy:ropsten": "npx truffle migrate  --f 1 --to 1 --network ropsten",
     "deploy:kovan": "npx truffle migrate  --f 1 --to 1 --network kovan",
+    "ganache": "npx ganache-cli --gasLimit=10000000 -e 10000 -d ganache-cli 1337",
+    "postinstall": "cd client && npm install",
+    "start": "npm --prefix client start",
     "test": "npx truffle test"
   },
   "repository": {
