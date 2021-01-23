@@ -120,7 +120,6 @@ class Batch extends Component {
       if (json.includes("__MY_BATCHER__")) {
         if (!batcherAddress) return;
         json = json.replace(/__MY_BATCHER__/g, batcherAddress);
-        console.log("rep", batcherAddress);
       }
       const state = JSON.parse(json);
       state.activeKeys = [];
