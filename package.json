@@ -5,9 +5,10 @@
   "scripts": {
     "compile": "npx truffle compile",
     "ganache": "npx ganache-cli --gasLimit=10000000 -e 10000 -d ganache-cli 1337",
-    "migrate:rinkeby": "npx truffle migrate --network rinkeby",
-    "migrate:ropsten": "npx truffle migrate --network ropsten",
-    "migrate:kovan": "npx truffle migrate --network kovan",
+    "deploy:client": "npm --prefix client run deploy",
+    "deploy:rinkeby": "npx truffle migrate  --f 1 --to 1 --network rinkeby",
+    "deploy:ropsten": "npx truffle migrate  --f 1 --to 1 --network ropsten",
+    "deploy:kovan": "npx truffle migrate  --f 1 --to 1 --network kovan",
     "test": "npx truffle test"
   },
   "repository": {
